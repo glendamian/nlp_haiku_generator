@@ -192,18 +192,13 @@ class LanguageModel:
             curr_token = sentence[-(self.n_gram - 1):]
             next_word = self.get_next_word(curr_token)
             new_count = syllables.estimate(next_word) + count_syllables
-
+            
+            # if next word is not haiku begin, end or unknown token and under syllable limit
             if next_word not in [self.line_begin, self.line_end, self.UNK] and (new_count <= syllable_limit):
                 sentence.append(next_word)
                 count_syllables = new_count
             else:
-                # to prevent long computation
+                # restart until we find matching syllable
                 sentence = sentence[:(self.n_gram-1)] if self.n_gram > 1 else sentence[:self.ng_gram]
                 count_syllables = 0
-
-        # for n > 2 case, we n - 2 append line ends at end of the sentence, as we have appended one in the previous while loop.
-        # In total, we will have n - 1 line ends.
-        if self.n_gram > 2:
-            for _ in range(self.n_gram - 2):
-                sentence.append(self.line_end)
         return ' '.join(sentence)
